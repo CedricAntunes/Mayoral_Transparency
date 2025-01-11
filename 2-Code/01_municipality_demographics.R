@@ -18,6 +18,10 @@ library(PNADcIBGE)
 # Municipal electoral cycles in Brazil 
 electoral_years <- c(2012, 2016, 2020, 2024)
 
+# ------------------------------------------------------------------------------
+# EXTRACTING THE DATA ----------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 # Municipal population data ----------------------------------------------------
 
 # Extracting population data
@@ -109,4 +113,33 @@ gdp_data <- gdp_data |>
          SIGLA_UF = `Sigla da Unidade da Federação`,
          NOME_UF = `Nome da Unidade da Federação`,
          CODIGO_MUNICIPIO = `Código do Município`,
-         NOME_MUNICIPIO = `Nome do Município`)
+         NOME_MUNICIPIO = `Nome do Município`) |>
+  # Padronizing data structure 
+  mutate(CODIGO_MUNICIPIO = as.character(CODIGO_MUNICIPIO)) |>
+  select(-NOME_MUNICIPIO)
+
+# ------------------------------------------------------------------------------
+# JOIN -------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Performing the join
+municipality_demographics <- left_join(pop_data,
+                                       gdp_data,
+                                       # Key for match
+                                       by = c("ANO",
+                                              "SIGLA_UF",
+                                              "CODIGO_MUNICIPIO"))
+
+# ------------------------------------------------------------------------------
+# SAVING THE DATA --------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Saving RDS data
+saveRDS(municipality_demographics,
+        "municipality_demographics_2012_2022.RDS")
+
+# Saving .csv data
+write.csv(municipality_demographics,
+          "municipality_demographics_2012_2022.csv",
+          sep = ",",
+          fileEncoding = "latin1")

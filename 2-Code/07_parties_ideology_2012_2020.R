@@ -71,7 +71,7 @@ zucco_data <- zucco_data |>
   filter(ANO %in% c("2013",
                     "2017",
                     "2021"))
-  
+
 # Replacing -999 with NA for columns 6 to 40
 zucco_data[, 6:40] <- lapply(zucco_data[, 6:40], function(x) ifelse(x == -999, NA, x))
 
@@ -88,11 +88,7 @@ averages_long <- averages_per_year |>
   # Cleanning and setting party acronyms
   mutate(SIGLA_PARTIDO = toupper(gsub("^lr", "", SIGLA_PARTIDO))) |>
   # Dropping NAs
-  drop_na(Ideology_Score)  
-
-# Scaling ideology scores from 0 (Left) to 1 (Right)
-averages_long <- averages_long |> 
-  mutate(Ideology_Score = scales::rescale(Ideology_Score, to = c(0, 1)))
+  drop_na(Ideology_Score)
 
 # ------------------------------------------------------------------------------
 # PLOT -------------------------------------------------------------------------
@@ -102,8 +98,8 @@ averages_long <- averages_long |>
 ggplot(averages_long, aes(x = Ideology_Score, y = reorder(SIGLA_PARTIDO, Ideology_Score), color = as.factor(ANO))) +
   geom_point(size = 3, alpha = 0.8) + 
   scale_x_continuous(
-    limits = c(0, 1), 
-    breaks = seq(0, 1, by = 0.2), 
+    limits = c(0, 10), 
+    breaks = seq(0, 10, by = 2), 
     labels = c("Left", "", "", "", "", "Right")  # Now matches the number of breaks
   ) +
   labs(title = "Brazilian Parties' Ideology Scores Across Years",

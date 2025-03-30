@@ -46,6 +46,21 @@ parties_ideology <- read.csv("parties_ideology_2012_2020.csv")
 # Loading new municipal fiscal capacity data (IPEA-DATA)
 mun_revenue_investment_expenditure_2012_2020 <- read.csv("mun_revenue_investment_expenditure_2012_2020.csv")
 
+# Loading MUNIC data 2019-2020
+munic_data <- readRDS("final_munic_data.rds") |>
+  # Selecting only variables of interest
+  select(CodMun,
+         MGOV01,
+         MGOV011B) |>
+  # Renaming vars
+  rename(COD_MUN_IBGE = CodMun,
+         HAS_LAI_LEGISLATION = MGOV01,
+         YEAR_LEGISLATION = MGOV011B) |>
+  # Standardizing var structure for join
+  mutate(COD_MUN_IBGE = as.character(COD_MUN_IBGE),
+         # Creating dummy var for LAI legislation
+         DUMMY_LAI_LEGISLATION = ifelse(HAS_LAI_LEGISLATION == "Sim", 1, 0))
+
 # ------------------------------------------------------------------------------
 # PREPARING DATA FOR JOIN ------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -156,6 +171,11 @@ merged_data <- merged_data |>
          SILGA_UE = SIGLA_UE.X,
          NOME_UF = NOME_UF.Y) |>
   select(-MUNICIPAL_FISCAL_CAPACITY)
+
+# Merging MUNIC data 
+merged_data <- merged_data |>
+  left_join(munic_data,
+            by = "COD_MUN_IBGE")
 
 # ------------------------------------------------------------------------------
 # SAVING THE DATA --------------------------------------------------------------
